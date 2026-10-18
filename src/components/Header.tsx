@@ -13,17 +13,35 @@ export function Header() {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => {
+    let frame = 0;
+    let solid = false;
+
+    const measure = () => {
+      frame = 0;
       const hero = document.getElementById("hero-sequence");
-      if (pathname === "/" && hero) {
-        setScrolled(hero.getBoundingClientRect().bottom <= window.innerHeight + 1);
+      const next =
+        pathname === "/" && hero
+          ? hero.getBoundingClientRect().bottom <= window.innerHeight + 1
+          : window.scrollY > 24;
+      if (next !== solid) {
+        solid = next;
+        setScrolled(next);
+      }
+    };
+
+    const onScroll = () => {
+      if (frame !== 0) {
         return;
       }
-      setScrolled(window.scrollY > 24);
+      frame = window.requestAnimationFrame(measure);
     };
-    onScroll();
+
+    measure();
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", onScroll);
+    };
   }, [pathname]);
 
   useEffect(() => {

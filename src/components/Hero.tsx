@@ -6,15 +6,17 @@ import { useEffect, useRef } from "react";
 import { heroStats } from "@/lib/properties";
 
 const FRAME_COUNT = 300;
-const KEYFRAME_STEP = 8;
-const AHEAD = 24;
-const BEHIND = 4;
-const MAX_LOADING = 4;
+const FRAME_WIDTH = 1920;
+const FRAME_HEIGHT = 1080;
+const MAX_FETCH = 6;
+const MAX_DECODE = 3;
+const DECODE_AHEAD = 8;
+const DECODE_BEHIND = 2;
 
 type Chapter = "drawing" | "structure" | "model" | "house";
 
 function frameSrc(index: number): string {
-  return `/frames/frame_${String(index + 1).padStart(4, "0")}.jpg?v=hq`;
+  return `/frames/frame_${String(index + 1).padStart(4, "0")}.webp`;
 }
 
 function chapterFor(progress: number): Chapter {
@@ -53,7 +55,7 @@ function prefersReducedMotion(): boolean {
 
 export function Hero() {
   const sectionRef = useRef<HTMLElement>(null);
-  const photoRef = useRef<HTMLImageElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const openingRef = useRef<HTMLDivElement>(null);
   const closingRef = useRef<HTMLDivElement>(null);
   const hintRef = useRef<HTMLDivElement>(null);
@@ -61,118 +63,194 @@ export function Hero() {
   const chapterRef = useRef<HTMLParagraphElement>(null);
 
   useEffect(() => {
-    const cache = new Map<number, HTMLImageElement>();
-    const loading = new Set<number>();
-    const queue: number[] = [];
-    let active = 0;
+    const blobs = new Map<number, Blob>();
+    const decoded = new Map<number, ImageBitmap>();
+    const fetching = new Set<number>();
+    const decoding = new Set<number>();
+    let queue: number[] = [];
+    let fetchActive = 0;
+    let decodeActive = 0;
     let disposed = false;
     let raf = 0;
     let current = 0;
     let shown = -1;
+    let distance = 0;
+    let context: CanvasRenderingContext2D | null = null;
 
-    function show(index: number) {
-      const photo = photoRef.current;
-      const image = cache.get(index);
-      if (!photo || !image || shown === index) {
+    function drawingContext(): CanvasRenderingContext2D | null {
+      if (context) {
+        return context;
+      }
+      const canvas = canvasRef.current;
+      if (!canvas) {
+        return null;
+      }
+      context = canvas.getContext("2d", { desynchronized: true }) ?? canvas.getContext("2d");
+      return context;
+    }
+
+    function paintFrame(index: number) {
+      if (shown === index) {
         return;
       }
-      photo.src = image.src;
+      const bitmap = decoded.get(index);
+      const ctx = drawingContext();
+      if (!bitmap || !ctx) {
+        return;
+      }
+      if (bitmap.width !== ctx.canvas.width || bitmap.height !== ctx.canvas.height) {
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = "high";
+      }
+      ctx.drawImage(bitmap, 0, 0, ctx.canvas.width, ctx.canvas.height);
       shown = index;
     }
 
-    function draw(target: number) {
-      if (cache.has(target)) {
-        show(target);
-        return;
-      }
-      let bestIndex = -1;
+    function nearestReady(target: number): number {
+      let best = -1;
       let bestDistance = Number.POSITIVE_INFINITY;
-      for (const index of cache.keys()) {
-        const distance = Math.abs(index - target);
-        if (distance < bestDistance) {
-          bestDistance = distance;
-          bestIndex = index;
+      for (const index of decoded.keys()) {
+        const gap = Math.abs(index - target);
+        if (gap < bestDistance) {
+          bestDistance = gap;
+          best = index;
         }
       }
-      if (bestIndex < 0) {
-        return;
-      }
-      if (shown >= 0 && Math.abs(shown - target) <= bestDistance) {
-        return;
-      }
-      show(bestIndex);
+      return best;
     }
 
-    function evict(center: number) {
-      if (cache.size < 80) {
+    function paint() {
+      if (decoded.has(current)) {
+        paintFrame(current);
         return;
       }
-      const disposable = [...cache.keys()]
-        .filter((index) => index !== shown && index % KEYFRAME_STEP !== 0 && index !== FRAME_COUNT - 1)
-        .sort((a, b) => Math.abs(b - center) - Math.abs(a - center));
-      while (cache.size > 56 && disposable.length > 0) {
-        const index = disposable.shift();
-        if (index === undefined) {
+      if (shown >= 0 && shown !== current) {
+        const direction = Math.sign(current - shown);
+        let next = shown;
+        for (const index of decoded.keys()) {
+          const towardTarget = direction > 0 ? index > next && index < current : index < next && index > current;
+          if (towardTarget) {
+            next = index;
+          }
+        }
+        if (next !== shown) {
+          paintFrame(next);
+          return;
+        }
+      }
+      const fallback = nearestReady(current);
+      if (fallback < 0) {
+        return;
+      }
+      if (shown < 0 || Math.abs(fallback - current) + 6 < Math.abs(shown - current)) {
+        paintFrame(fallback);
+      }
+    }
+
+    function releaseDistantBitmaps(center: number) {
+      const keep = DECODE_AHEAD + DECODE_BEHIND + 2;
+      for (const index of decoded.keys()) {
+        if (index !== shown && Math.abs(index - center) > keep) {
+          decoded.get(index)?.close();
+          decoded.delete(index);
+        }
+      }
+    }
+
+    function startDecode(index: number) {
+      const blob = blobs.get(index);
+      if (!blob || decoded.has(index) || decoding.has(index) || disposed) {
+        return;
+      }
+      decoding.add(index);
+      decodeActive += 1;
+      createImageBitmap(blob)
+        .then((bitmap) => {
+          if (disposed || Math.abs(index - current) > DECODE_AHEAD + DECODE_BEHIND + 4) {
+            bitmap.close();
+            return;
+          }
+          decoded.set(index, bitmap);
+          paint();
+        })
+        .catch(() => undefined)
+        .finally(() => {
+          decoding.delete(index);
+          decodeActive -= 1;
+          if (!disposed) {
+            fillDecoded(current);
+          }
+        });
+    }
+
+    function fillDecoded(center: number) {
+      const wanted: number[] = [];
+      for (let offset = 0; offset <= DECODE_AHEAD; offset += 1) {
+        wanted.push(center + offset);
+        if (offset > 0 && offset <= DECODE_BEHIND) {
+          wanted.push(center - offset);
+        }
+      }
+      for (const index of wanted) {
+        if (decodeActive >= MAX_DECODE) {
           break;
         }
-        const image = cache.get(index);
-        if (image) {
-          image.src = "";
+        if (index < 0 || index >= FRAME_COUNT) {
+          continue;
         }
-        cache.delete(index);
+        startDecode(index);
       }
+      releaseDistantBitmaps(center);
     }
 
     function pump() {
-      while (active < MAX_LOADING && queue.length > 0 && !disposed) {
+      while (fetchActive < MAX_FETCH && queue.length > 0 && !disposed) {
         const index = queue.shift();
-        if (index === undefined || cache.has(index) || loading.has(index)) {
+        if (index === undefined || blobs.has(index) || fetching.has(index)) {
           continue;
         }
-        active += 1;
-        loading.add(index);
-        const image = new Image();
-        image.decoding = "async";
-        image.src = frameSrc(index);
-        image.onload = () => {
-          active -= 1;
-          loading.delete(index);
-          if (disposed) {
-            return;
-          }
-          cache.set(index, image);
-          if (Math.abs(index - current) <= 1 || shown < 0) {
-            draw(current);
-          }
-          pump();
-        };
-        image.onerror = () => {
-          active -= 1;
-          loading.delete(index);
-          pump();
-        };
+        fetching.add(index);
+        fetchActive += 1;
+        fetch(frameSrc(index))
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("missing frame");
+            }
+            return response.blob();
+          })
+          .then((blob) => {
+            if (!disposed) {
+              blobs.set(index, blob);
+            }
+          })
+          .catch(() => undefined)
+          .finally(() => {
+            fetching.delete(index);
+            fetchActive -= 1;
+            if (disposed) {
+              return;
+            }
+            pump();
+            fillDecoded(current);
+            paint();
+          });
       }
     }
 
-    function request(index: number) {
-      if (index < 0 || index >= FRAME_COUNT || cache.has(index) || loading.has(index)) {
-        return;
+    function prioritize(center: number) {
+      const next: number[] = [];
+      for (let offset = 0; offset < FRAME_COUNT; offset += 1) {
+        const ahead = center + offset;
+        const behind = center - offset;
+        if (ahead < FRAME_COUNT && !blobs.has(ahead) && !fetching.has(ahead)) {
+          next.push(ahead);
+        }
+        if (offset > 0 && behind >= 0 && !blobs.has(behind) && !fetching.has(behind)) {
+          next.push(behind);
+        }
       }
-      if (!queue.includes(index)) {
-        queue.push(index);
-      }
+      queue = next;
       pump();
-    }
-
-    function requestWindow(center: number) {
-      request(center);
-      for (let offset = 1; offset <= AHEAD; offset += 1) {
-        request(center + offset);
-      }
-      for (let offset = 1; offset <= BEHIND; offset += 1) {
-        request(center - offset);
-      }
-      evict(center);
     }
 
     function syncOverlays(progress: number) {
@@ -202,19 +280,45 @@ export function Hero() {
       }
     }
 
+    function measure() {
+      const section = sectionRef.current;
+      distance = section ? Math.max(section.offsetHeight - window.innerHeight, 0) : 0;
+    }
+
     function update() {
       const section = sectionRef.current;
       if (!section) {
         return;
       }
-      const rect = section.getBoundingClientRect();
-      const distance = section.offsetHeight - window.innerHeight;
-      const traveled = Math.min(Math.max(-rect.top, 0), Math.max(distance, 0));
+      const traveled = Math.min(Math.max(-section.getBoundingClientRect().top, 0), distance);
       const progress = distance <= 0 ? 0 : traveled / distance;
       current = Math.round(progress * (FRAME_COUNT - 1));
-      requestWindow(current);
-      draw(current);
+      prioritize(current);
+      fillDecoded(current);
+      paint();
       syncOverlays(progress);
+    }
+
+    function onScroll() {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(update);
+    }
+
+    function onResize() {
+      measure();
+      update();
+    }
+
+    function release() {
+      disposed = true;
+      cancelAnimationFrame(raf);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onResize);
+      for (const bitmap of decoded.values()) {
+        bitmap.close();
+      }
+      decoded.clear();
+      blobs.clear();
     }
 
     if (prefersReducedMotion()) {
@@ -222,57 +326,38 @@ export function Hero() {
       if (section) {
         section.style.height = "100svh";
       }
-      request(FRAME_COUNT - 1);
       current = FRAME_COUNT - 1;
       syncOverlays(1);
-      return () => {
-        disposed = true;
-      };
+      prioritize(current);
+      return release;
     }
 
-    for (let index = 0; index < FRAME_COUNT; index += KEYFRAME_STEP) {
-      request(index);
-    }
-    request(FRAME_COUNT - 1);
-    requestWindow(0);
+    measure();
+    prioritize(0);
     update();
-
-    const onScroll = () => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(update);
-    };
     window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onResize);
 
-    return () => {
-      disposed = true;
-      cancelAnimationFrame(raf);
-      window.removeEventListener("scroll", onScroll);
-      cache.clear();
-    };
+    return release;
   }, []);
 
   return (
     <section
       id="hero-sequence"
       ref={sectionRef}
-      className="relative h-[460vh] bg-charcoal lg:h-[560vh]"
+      className="relative h-[calc(100svh+4800px)] bg-charcoal"
       aria-label="Introduction"
     >
       <div
         className="sticky top-0 h-[100svh] overflow-hidden bg-cover bg-center"
-        style={{ backgroundImage: "url(/frames/frame_0001.jpg?v=hq)" }}
+        style={{ backgroundImage: "url(/frames/frame_0001.webp)" }}
       >
-        {/* The sequence must stay the original JPEG. next/image would resample it. */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          ref={photoRef}
-          src="/frames/frame_0001.jpg?v=hq"
-          alt=""
-          width={1920}
-          height={1080}
+        <canvas
+          ref={canvasRef}
+          width={FRAME_WIDTH}
+          height={FRAME_HEIGHT}
           className="absolute inset-0 h-full w-full object-cover"
-          draggable={false}
-          fetchPriority="high"
+          aria-hidden="true"
         />
         <p className="sr-only">
           Scroll to move from the architectural drawing, through the structural model, to the finished house.

@@ -24,7 +24,12 @@
 }
 
 html {
-  scroll-behavior: smooth;
+  scroll-behavior: auto;
+}
+
+#content > :not(#hero-sequence) {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 70vh;
 }
 
 body {
