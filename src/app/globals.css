@@ -1,0 +1,68 @@
+@import "tailwindcss";
+
+:root {
+  --paper: #f3eee6;
+  --ink: #1c1a17;
+  --gold: #a89068;
+  --charcoal: #141311;
+}
+
+@theme inline {
+  --font-sans: var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-cormorant), "Times New Roman", serif;
+  --color-charcoal: #141311;
+  --color-charcoal-soft: #221f1c;
+  --color-ink: #1c1a17;
+  --color-paper: #f3eee6;
+  --color-paper-deep: #e5ddd0;
+  --color-gold: #a89068;
+  --color-gold-soft: #c6b48f;
+  --color-moss: #3e5344;
+  --color-moss-deep: #24342b;
+  --color-stone: #6f695f;
+  --color-line: rgba(28, 26, 23, 0.12);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: #a89068;
+  color: #141311;
+}
+
+:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.marquee-track {
+  animation: marquee 52s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .marquee-track {
+    animation: none;
+  }
+}
