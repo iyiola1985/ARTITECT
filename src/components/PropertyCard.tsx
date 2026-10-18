@@ -44,7 +44,7 @@ export function PropertyCard({ residence }: { residence: Residence }) {
           </div>
         </div>
         <div className="pt-5">
-          <div className="flex items-center justify-between gap-4 text-[11px] uppercase tracking-[0.22em] text-stone">
+          <div className="flex flex-col items-start gap-1 text-[11px] uppercase tracking-[0.14em] text-stone sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:tracking-[0.22em]">
             <span>{kindLabel(residence.kind)}</span>
             <span>{residence.location}</span>
           </div>

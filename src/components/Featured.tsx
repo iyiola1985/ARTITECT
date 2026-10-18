@@ -20,7 +20,7 @@ export function Featured() {
         sizes="100vw"
         className="object-cover"
       />
-      <div className="absolute inset-0 bg-gradient-to-r from-charcoal/80 via-charcoal/35 to-charcoal/10" />
+      <div className="absolute inset-0 bg-gradient-to-t from-charcoal via-charcoal/55 to-charcoal/15 sm:bg-gradient-to-r sm:from-charcoal/80 sm:via-charcoal/35 sm:to-charcoal/10" />
       <div className="relative z-10 mx-auto flex min-h-[78vh] max-w-[1500px] flex-col justify-end px-5 py-16 sm:px-8 lg:px-12 lg:py-20">
         <p className="text-[11px] uppercase tracking-[0.32em] text-gold-soft">Featured villa</p>
         <h2 id="featured-title" className="mt-4 max-w-xl font-display text-6xl leading-[0.9] sm:text-7xl">

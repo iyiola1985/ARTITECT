@@ -112,7 +112,7 @@ export function Collection({ variant = "home" }: CollectionProps) {
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="Search name or place"
-                className="w-full border border-line bg-transparent py-2.5 pl-10 pr-3 text-sm text-ink outline-none placeholder:text-stone/70 focus:border-gold"
+                className="w-full border border-line bg-transparent py-2.5 pl-10 pr-3 text-base text-ink outline-none placeholder:text-stone/70 focus:border-gold sm:text-sm"
               />
             </label>
             <label className="text-sm text-stone">
@@ -120,7 +120,7 @@ export function Collection({ variant = "home" }: CollectionProps) {
               <select
                 value={sort}
                 onChange={(event) => setSort(event.target.value as SortKey)}
-                className="w-full border border-line bg-paper px-3 py-2.5 text-sm text-ink outline-none focus:border-gold sm:w-auto"
+                className="w-full border border-line bg-paper px-3 py-2.5 text-base text-ink outline-none focus:border-gold sm:w-auto sm:text-sm"
               >
                 <option value="featured">Featured order</option>
                 <option value="price">Guide price</option>

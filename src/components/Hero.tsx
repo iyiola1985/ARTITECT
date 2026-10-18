@@ -345,7 +345,7 @@ export function Hero() {
     <section
       id="hero-sequence"
       ref={sectionRef}
-      className="relative h-[calc(100svh+4800px)] bg-charcoal"
+      className="relative h-[calc(100svh+2800px)] bg-charcoal sm:h-[calc(100svh+4800px)]"
       aria-label="Introduction"
     >
       <div
@@ -367,11 +367,11 @@ export function Hero() {
 
         <div
           ref={openingRef}
-          className="pointer-events-none absolute inset-x-0 bottom-0 z-10 mx-auto flex max-w-[1500px] items-end justify-between gap-8 px-5 pb-24 sm:px-8 lg:px-12"
+          className="pointer-events-none absolute inset-x-0 bottom-0 z-10 mx-auto flex max-w-[1500px] items-end justify-between gap-8 px-5 pb-20 sm:px-8 sm:pb-24 lg:px-12"
         >
-          <div>
-            <p className="text-[11px] uppercase tracking-[0.38em] text-gold-soft">Designer residences</p>
-            <h1 className="mt-3 font-display text-6xl leading-[0.85] text-paper sm:text-8xl lg:text-[8.2rem]">
+          <div className="min-w-0">
+            <p className="text-[11px] uppercase tracking-[0.22em] text-gold-soft sm:tracking-[0.38em]">Designer residences</p>
+            <h1 className="mt-3 font-display text-[3.25rem] leading-[0.85] text-paper sm:text-8xl lg:text-[8.2rem]">
               ARTITEC
             </h1>
           </div>
@@ -396,8 +396,8 @@ export function Hero() {
           <span className="h-10 w-px bg-gold" />
         </div>
 
-        <div className="absolute inset-x-0 bottom-0 z-20 flex items-center justify-between gap-6 px-5 py-4 sm:px-8 lg:px-12">
-          <p ref={chapterRef} data-chapter="drawing" className="text-[11px] uppercase tracking-[0.28em] text-paper/85">
+        <div className="absolute inset-x-0 bottom-0 z-20 flex items-center justify-between gap-4 px-5 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:gap-6 sm:px-8 lg:px-12">
+          <p ref={chapterRef} data-chapter="drawing" className="shrink-0 text-[11px] uppercase tracking-[0.18em] text-paper/85 sm:tracking-[0.28em]">
             The drawing
           </p>
           <span className="relative h-px flex-1 bg-white/20">
@@ -412,43 +412,43 @@ export function Hero() {
 function ClosingCopy({ heading }: { heading: boolean }) {
   const Title = heading ? "h1" : "p";
   return (
-    <div className="absolute inset-x-0 bottom-0 z-10 mx-auto flex min-h-[100svh] max-w-[1500px] flex-col justify-end px-5 pb-24 pt-28 sm:px-8 lg:px-12">
-      <div className="grid items-end gap-10 lg:grid-cols-[minmax(0,1fr)_auto] lg:gap-16">
-        <div>
-          <p className="text-[11px] uppercase tracking-[0.38em] text-gold-soft">The finished house</p>
-          <Title className="mt-4 font-display text-6xl leading-[0.82] text-paper sm:text-8xl lg:text-[7.4rem]">
+    <div className="absolute inset-x-0 bottom-0 z-10 mx-auto flex min-h-[100svh] max-w-[1500px] flex-col justify-end overflow-y-auto px-5 pb-16 pt-24 sm:px-8 sm:pb-24 sm:pt-28 lg:px-12">
+      <div className="grid items-end gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:gap-16">
+        <div className="min-w-0">
+          <p className="text-[11px] uppercase tracking-[0.22em] text-gold-soft sm:tracking-[0.38em]">The finished house</p>
+          <Title className="mt-3 font-display text-5xl leading-[0.85] text-paper sm:mt-4 sm:text-8xl lg:text-[7.4rem]">
             ARTITEC
           </Title>
-          <p className="mt-5 max-w-md text-base leading-7 text-paper/85 sm:text-lg">
+          <p className="mt-4 max-w-md text-base leading-7 text-paper/85 sm:mt-5 sm:text-lg">
             A private collection of villas and courtyard houses, composed with landscape, light, and material.
           </p>
-          <div className="mt-8 flex flex-wrap items-center gap-6">
-            <span className="h-px w-10 bg-gold" aria-hidden="true" />
+          <div className="mt-6 flex flex-col items-stretch gap-4 sm:mt-8 sm:flex-row sm:flex-wrap sm:items-center sm:gap-6">
+            <span className="hidden h-px w-10 bg-gold sm:block" aria-hidden="true" />
             <Link
               href="/#contact"
-              className="bg-paper px-5 py-3 text-[11px] uppercase tracking-[0.22em] text-charcoal transition duration-300 hover:bg-gold"
+              className="inline-flex min-h-11 items-center justify-center bg-paper px-5 py-3 text-center text-[11px] uppercase tracking-[0.18em] text-charcoal transition duration-300 hover:bg-gold sm:tracking-[0.22em]"
             >
               Enquire about a residence
             </Link>
             <Link
               href="/#villas"
-              className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.22em] text-paper transition hover:text-gold-soft"
+              className="inline-flex min-h-11 items-center justify-center gap-2 text-[11px] uppercase tracking-[0.18em] text-paper transition hover:text-gold-soft sm:justify-start sm:tracking-[0.22em]"
             >
               View the collection
               <ArrowDownRight className="h-4 w-4" aria-hidden="true" />
             </Link>
           </div>
         </div>
-        <dl className="grid grid-cols-2 gap-x-8 gap-y-7 sm:grid-cols-4 lg:gap-x-10">
+        <dl className="grid grid-cols-2 gap-x-4 gap-y-5 sm:grid-cols-4 sm:gap-x-8 sm:gap-y-7 lg:gap-x-10">
           {heroStats.map((stat) => (
-            <div key={stat.label} className="min-w-[6.5rem] border-t border-white/25 pt-3">
-              <dt className="font-display text-3xl leading-none text-paper sm:text-4xl">
+            <div key={stat.label} className="min-w-0 border-t border-white/25 pt-3">
+              <dt className="font-display text-2xl leading-none text-paper sm:text-4xl">
                 {stat.value}
                 {"suffix" in stat ? (
                   <span className="ml-0.5 align-top text-sm tracking-normal">{stat.suffix}</span>
                 ) : null}
               </dt>
-              <dd className="mt-2 text-[11px] uppercase tracking-[0.18em] text-paper/70">{stat.label}</dd>
+              <dd className="mt-2 text-[10px] uppercase tracking-[0.12em] text-paper/70 sm:text-[11px] sm:tracking-[0.18em]">{stat.label}</dd>
             </div>
           ))}
         </dl>

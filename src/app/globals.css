@@ -27,12 +27,8 @@ html {
   scroll-behavior: auto;
 }
 
-#content > :not(#hero-sequence) {
-  content-visibility: auto;
-  contain-intrinsic-size: auto 70vh;
-}
-
 body {
+  overflow-x: clip;
   background: var(--paper);
   color: var(--ink);
   font-family: var(--font-outfit), ui-sans-serif, system-ui, sans-serif;

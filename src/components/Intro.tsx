@@ -23,18 +23,18 @@ export function Intro() {
               The current collection holds {villas} villas and {homes} residences. Viewings are private. Figures shown beside each house are guides for this demonstration, not published offers.
             </p>
           </div>
-          <dl className="mt-10 grid grid-cols-3 gap-6 border-t border-line pt-8">
-            <div>
-              <dt className="font-display text-4xl text-ink">{String(residences.length).padStart(2, "0")}</dt>
-              <dd className="mt-2 text-[11px] uppercase tracking-[0.18em] text-stone">Houses</dd>
+          <dl className="mt-10 grid grid-cols-3 gap-3 border-t border-line pt-8 sm:gap-6">
+            <div className="min-w-0">
+              <dt className="font-display text-3xl text-ink sm:text-4xl">{String(residences.length).padStart(2, "0")}</dt>
+              <dd className="mt-2 text-[10px] uppercase tracking-[0.12em] text-stone sm:text-[11px] sm:tracking-[0.18em]">Houses</dd>
             </div>
-            <div>
-              <dt className="font-display text-4xl text-ink">01</dt>
-              <dd className="mt-2 text-[11px] uppercase tracking-[0.18em] text-stone">Introduction</dd>
+            <div className="min-w-0">
+              <dt className="font-display text-3xl text-ink sm:text-4xl">01</dt>
+              <dd className="mt-2 text-[10px] uppercase tracking-[0.12em] text-stone sm:text-[11px] sm:tracking-[0.18em]">Introduction</dd>
             </div>
-            <div>
-              <dt className="font-display text-4xl text-moss">{String(villas).padStart(2, "0")}</dt>
-              <dd className="mt-2 text-[11px] uppercase tracking-[0.18em] text-stone">Villas</dd>
+            <div className="min-w-0">
+              <dt className="font-display text-3xl text-moss sm:text-4xl">{String(villas).padStart(2, "0")}</dt>
+              <dd className="mt-2 text-[10px] uppercase tracking-[0.12em] text-stone sm:text-[11px] sm:tracking-[0.18em]">Villas</dd>
             </div>
           </dl>
         </Reveal>

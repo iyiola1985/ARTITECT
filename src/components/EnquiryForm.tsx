@@ -145,7 +145,7 @@ export function EnquiryForm({ lockedSlug, id = "enquiry-form" }: EnquiryFormProp
               onChange={(event) => update("residence", event.target.value)}
               aria-invalid={Boolean(errors.residence)}
               aria-describedby={errors.residence ? `${id}-residence-error` : undefined}
-              className="mt-3 w-full border-b border-white/20 bg-transparent py-3 text-paper outline-none focus:border-gold"
+              className="mt-3 w-full border-b border-white/20 bg-transparent py-3 text-base text-paper outline-none focus:border-gold"
             >
               <option value="" className="text-ink">
                 Select a residence
@@ -175,7 +175,7 @@ export function EnquiryForm({ lockedSlug, id = "enquiry-form" }: EnquiryFormProp
           rows={5}
           aria-invalid={Boolean(errors.message)}
           aria-describedby={errors.message ? `${id}-message-error` : undefined}
-          className="mt-3 w-full resize-y border-b border-white/20 bg-transparent py-3 text-paper outline-none focus:border-gold"
+          className="mt-3 w-full resize-y border-b border-white/20 bg-transparent py-3 text-base text-paper outline-none focus:border-gold"
         />
         {errors.message ? (
           <p id={`${id}-message-error`} className="mt-2 text-sm text-[#e7b2a4]">
@@ -186,7 +186,7 @@ export function EnquiryForm({ lockedSlug, id = "enquiry-form" }: EnquiryFormProp
       <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <button
           type="submit"
-          className="bg-gold px-5 py-3 text-[11px] uppercase tracking-[0.2em] text-charcoal transition hover:bg-gold-soft"
+          className="inline-flex min-h-11 items-center justify-center bg-gold px-5 py-3 text-[11px] uppercase tracking-[0.2em] text-charcoal transition hover:bg-gold-soft"
         >
           Review enquiry
         </button>
@@ -231,7 +231,7 @@ function Field({
         aria-invalid={Boolean(error)}
         aria-describedby={error ? `${id}-error` : undefined}
         onChange={(event) => onChange(event.target.value)}
-        className="mt-3 w-full border-b border-white/20 bg-transparent py-3 text-paper outline-none focus:border-gold"
+        className="mt-3 w-full border-b border-white/20 bg-transparent py-3 text-base text-paper outline-none focus:border-gold"
       />
       {error ? (
         <p id={`${id}-error`} className="mt-2 text-sm text-[#e7b2a4]">

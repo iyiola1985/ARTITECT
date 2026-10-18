@@ -68,9 +68,9 @@ export default async function ResidencePage({ params }: ResidencePageProps) {
           </div>
           <dl className="grid grid-cols-2 gap-px self-start bg-line">
             {specs.map((spec) => (
-              <div key={spec.label} className="bg-paper p-6">
-                <dt className="text-[11px] uppercase tracking-[0.2em] text-stone">{spec.label}</dt>
-                <dd className="mt-3 font-display text-3xl text-ink">{spec.value}</dd>
+              <div key={spec.label} className="min-w-0 bg-paper p-4 sm:p-6">
+                <dt className="text-[11px] uppercase tracking-[0.16em] text-stone sm:tracking-[0.2em]">{spec.label}</dt>
+                <dd className="mt-3 break-words font-display text-2xl leading-tight text-ink sm:text-3xl">{spec.value}</dd>
               </div>
             ))}
           </dl>
@@ -79,7 +79,7 @@ export default async function ResidencePage({ params }: ResidencePageProps) {
         <div id="enquire" className="mx-auto mt-20 grid max-w-[1500px] gap-10 scroll-mt-28 lg:grid-cols-[0.8fr_1.2fr]">
           <div>
             <p className="text-[11px] uppercase tracking-[0.28em] text-gold">Enquire</p>
-            <h2 className="mt-4 font-display text-5xl leading-none text-ink">
+            <h2 className="mt-4 font-display text-4xl leading-[0.95] text-ink sm:text-5xl">
               Ask about {residence.name}.
             </h2>
             <p className="mt-5 max-w-sm text-sm leading-7 text-stone">

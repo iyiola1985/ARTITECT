@@ -79,17 +79,20 @@ export function Header() {
 
     event.preventDefault();
     setOpen(false);
-    target.scrollIntoView({ behavior: "smooth", block: "start" });
+    window.setTimeout(() => {
+      const top = target.getBoundingClientRect().top + window.scrollY - 96;
+      window.scrollTo({ top: Math.max(top, 0), behavior: "smooth" });
+    }, 60);
   }
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50">
+    <header className="fixed inset-x-0 top-0 z-50 pt-[env(safe-area-inset-top)]">
       <div
-        className={`absolute inset-x-0 top-0 h-[4.5rem] transition-colors duration-500 ${
+        className={`absolute inset-x-0 top-0 h-[calc(4.5rem+env(safe-area-inset-top))] transition-colors duration-500 ${
           solid ? "bg-charcoal/95 shadow-[0_12px_40px_-28px_rgba(0,0,0,0.8)] backdrop-blur-md" : "bg-transparent"
         }`}
       />
-      <div className="relative z-50 mx-auto flex h-[4.5rem] max-w-[1500px] items-center justify-between gap-4 px-5 sm:px-8 lg:px-12">
+      <div className="relative z-50 mx-auto flex h-[4.5rem] max-w-[1500px] items-center justify-between gap-3 px-5 sm:px-8 lg:px-12">
         <Link href="/" aria-label="Artitec home" className="relative z-10">
           <Logo />
         </Link>
@@ -117,7 +120,7 @@ export function Header() {
           </Link>
           <button
             type="button"
-            className="inline-flex h-10 w-10 items-center justify-center text-paper lg:hidden"
+            className="inline-flex h-11 w-11 items-center justify-center text-paper lg:hidden"
             aria-expanded={open}
             aria-controls="mobile-menu"
             onClick={() => setOpen((value) => !value)}
@@ -129,21 +132,21 @@ export function Header() {
       </div>
 
       {open ? (
-        <div id="mobile-menu" className="fixed inset-x-0 bottom-0 top-[4.5rem] z-40 overflow-y-auto bg-charcoal px-6 py-10 lg:hidden">
-          <nav className="flex flex-col gap-6" aria-label="Mobile">
+        <div id="mobile-menu" className="fixed inset-x-0 bottom-0 top-[calc(4.5rem+env(safe-area-inset-top))] z-40 overflow-y-auto bg-charcoal px-6 py-8 pb-[max(2rem,env(safe-area-inset-bottom))] lg:hidden">
+          <nav className="flex flex-col gap-2" aria-label="Mobile">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 onClick={(event) => scrollToHash(event, link.href)}
-                className="font-display text-5xl text-paper"
+                className="py-2 font-display text-4xl text-paper sm:text-5xl"
               >
                 {link.label}
               </Link>
             ))}
             <Link
               href="/contact"
-              className="mt-4 inline-flex w-fit bg-gold px-5 py-3 text-[11px] uppercase tracking-[0.22em] text-charcoal"
+              className="mt-6 inline-flex min-h-11 w-full items-center justify-center bg-gold px-5 py-3 text-[11px] uppercase tracking-[0.22em] text-charcoal"
             >
               Enquire
             </Link>

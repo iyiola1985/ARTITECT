@@ -28,7 +28,7 @@ export function ResidenceHero({ residence }: { residence: Residence }) {
 
   return (
     <div className="bg-charcoal pt-[4.5rem] text-paper">
-      <div className="relative h-[72vh] min-h-[520px]">
+      <div className="relative h-[68svh] min-h-[26rem] sm:h-[72vh] sm:min-h-[520px]">
         <AnimatePresence mode="wait">
           <motion.div
             key={image.src}
@@ -50,7 +50,7 @@ export function ResidenceHero({ residence }: { residence: Residence }) {
         </AnimatePresence>
         <div className="absolute inset-0 bg-gradient-to-t from-charcoal via-charcoal/10 to-charcoal/25" />
         {hasGallery ? (
-          <div className="absolute bottom-28 right-5 z-10 flex gap-2 sm:right-8">
+          <div className="absolute right-5 top-6 z-10 flex gap-2 sm:bottom-28 sm:right-8 sm:top-auto">
             <button
               type="button"
               onClick={() => step(-1)}
@@ -79,7 +79,7 @@ export function ResidenceHero({ residence }: { residence: Residence }) {
           <p className="mt-5 text-[11px] uppercase tracking-[0.28em] text-gold-soft">
             {kindLabel(residence.kind)} · {residence.location}
           </p>
-          <h1 className="mt-3 font-display text-5xl leading-[0.9] sm:text-7xl">{residence.name}</h1>
+          <h1 className="mt-3 max-w-full font-display text-4xl leading-[0.95] sm:text-7xl">{residence.name}</h1>
         </div>
       </div>
 
@@ -94,7 +94,7 @@ export function ResidenceHero({ residence }: { residence: Residence }) {
             <p className="mt-2 text-xs text-stone">A placeholder figure for this demonstration. Not an offer.</p>
           </div>
           {hasGallery ? (
-            <div className="flex gap-3" aria-label="Photographs">
+            <div className="flex gap-3 overflow-x-auto" aria-label="Photographs">
               {residence.images.map((item, itemIndex) => {
                 const selected = itemIndex === index;
                 return (
@@ -104,7 +104,7 @@ export function ResidenceHero({ residence }: { residence: Residence }) {
                     aria-label={`Show photograph ${itemIndex + 1}`}
                     aria-pressed={selected}
                     onClick={() => setIndex(itemIndex)}
-                    className={`relative h-16 w-24 overflow-hidden border ${
+                    className={`relative h-14 w-20 shrink-0 overflow-hidden border sm:h-16 sm:w-24 ${
                       selected ? "border-gold" : "border-transparent opacity-70 hover:opacity-100"
                     }`}
                   >
